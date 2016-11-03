@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: elevator-services
+elevator:
+  services:
+    stories: 100
+    elevators: 8
+logging:
+  path: ./logs
+  level:
+    com:
+      challenge: DEBUG
