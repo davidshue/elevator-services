@@ -105,11 +105,11 @@ public class Elevator extends Thread {
 	 * @return
 	 */
 	private int getNextStop() {
-		return getQueue(pendingRequests).get(0);
+		return getQueue().get(0);
 	}
 
-	private List<Integer> getQueue(Set<Integer> requests) {
-		final List<Integer> priority = new ArrayList<>(requests);
+	private List<Integer> getQueue() {
+		final List<Integer> priority = new ArrayList<>(pendingRequests);
 		Collections.sort(priority, (o1, o2) -> {
 			if (status.getDirection() == Direction.up) {
 				if (o1 > currentLevel && o2 > currentLevel) {
@@ -137,15 +137,6 @@ public class Elevator extends Thread {
 
 		return priority;
 	}
-
-	/**
-	 * Assume it takes 2 seconds to travel 1 level, 5 seconds to stop at a level. The sequence follows the queue
-	 * @param targetLevel
-	 * @return
-     */
-	//private int getTimeToThatLevel(int targetLevel) {
-	//
-	//}
 
 
 	/**
@@ -200,6 +191,6 @@ public class Elevator extends Thread {
 
 	@Override
 	public String toString() {
-		return "elevator " + getNumber() + " " + getStatus() + " -> level " + getCurrentLevel() + " " + getQueue(pendingRequests);
+		return "elevator " + getNumber() + " " + getStatus() + " -> level " + getCurrentLevel() + " " + getQueue();
 	}
 }
