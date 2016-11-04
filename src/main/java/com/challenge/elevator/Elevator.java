@@ -63,9 +63,10 @@ public class Elevator extends Thread {
 
 	@Override
 	public void run()  {
-		synchronized (this) {
-			while(true) {
-				if (pendingRequests.isEmpty()) {
+
+		while(true) {
+			if (pendingRequests.isEmpty()) {
+				synchronized (this) {
 					try {
 						logger.debug(this);
 						this.status = Status.idle;
@@ -74,27 +75,28 @@ public class Elevator extends Thread {
 						e.printStackTrace();
 					}
 				}
-
-				int nextLevel = getNextStop();
-				if (currentLevel > nextLevel) {
-					this.status = Status.going_down;
-				}
-				else {
-					this.status = Status.going_up;
-				}
-				this.currentLevel = nextLevel;
-				logger.debug("elevator " + this.getNumber() + " " + this.getStatus() + " to " + nextLevel);
-
-				pendingRequests.remove(this.currentLevel);
-				// Spend 2000 ms stopping at a level
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				logger.debug("elevator " + this.getNumber() + " " + this.getStatus() + " reached " + nextLevel);
 			}
+
+			int nextLevel = getNextStop();
+			if (currentLevel > nextLevel) {
+				this.status = Status.going_down;
+			}
+			else {
+				this.status = Status.going_up;
+			}
+			this.currentLevel = nextLevel;
+			logger.debug("elevator " + this.getNumber() + " " + this.getStatus() + " to " + nextLevel);
+
+			pendingRequests.remove(this.currentLevel);
+			// Spend 2000 ms stopping at a level
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			logger.debug("elevator " + this.getNumber() + " " + this.getStatus() + " reached " + nextLevel);
 		}
+
 
 	}
 
@@ -103,11 +105,11 @@ public class Elevator extends Thread {
 	 * @return
 	 */
 	private int getNextStop() {
-		return getQueue().get(0);
+		return getQueue(pendingRequests).get(0);
 	}
 
-	private List<Integer> getQueue() {
-		final List<Integer> priority = new ArrayList<>(pendingRequests);
+	private List<Integer> getQueue(Set<Integer> requests) {
+		final List<Integer> priority = new ArrayList<>(requests);
 		Collections.sort(priority, (o1, o2) -> {
 			if (status.getDirection() == Direction.up) {
 				if (o1 > currentLevel && o2 > currentLevel) {
@@ -135,6 +137,15 @@ public class Elevator extends Thread {
 
 		return priority;
 	}
+
+	/**
+	 * Assume it takes 2 seconds to travel 1 level, 5 seconds to stop at a level. The sequence follows the queue
+	 * @param targetLevel
+	 * @return
+     */
+	//private int getTimeToThatLevel(int targetLevel) {
+	//
+	//}
 
 
 	/**
@@ -189,6 +200,6 @@ public class Elevator extends Thread {
 
 	@Override
 	public String toString() {
-		return "elevator " + getNumber() + " " + getStatus() + " -> level " + getCurrentLevel() + " " + getQueue();
+		return "elevator " + getNumber() + " " + getStatus() + " -> level " + getCurrentLevel() + " " + getQueue(pendingRequests);
 	}
 }
